@@ -103,10 +103,20 @@ class Peptide(Metabolite):
 
     @property
     def peptide(self):
-        if not self._peptide:
-            return self.gene.peptide
+        if self._peptide:
+            return Seq(self._peptide)
+        
+        gene = self.gene
+        if gene is None:
+            return None
+        
+        if hasattr(gene, 'peptide'):
+            return gene.peptide
+        elif hasattr(gene, 'sequence'):
+            return Seq(gene.sequence)
         else:
-            return Seq(self._peptide)#, ProteinAlphabet())
+            self.model.logger.warning(f"Gene {self._gene_id} has no 'peptide' or 'sequence' attribute")
+            return None
         
     @peptide.setter
     def peptide(self, value):
